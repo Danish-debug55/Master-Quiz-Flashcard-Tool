@@ -1,0 +1,42 @@
+# ── Python ────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# ── Environment / secrets ─────────────────────────────────────
+.env
+.env.*
+*.env
+
+# ── Terraform ─────────────────────────────────────────────────
+.terraform/
+**/.terraform/
+.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/*.tfvars
+
+# ── Per-user progress data (runtime, never commit) ────────────
+data/progress/
+
+# ── AWS credentials ───────────────────────────────────────────
+.aws/
+credentials
+
+# ── macOS ─────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ── VS Code ───────────────────────────────────────────────────
+.vscode/
+
+# ── Logs ──────────────────────────────────────────────────────
+*.log
+logs/

@@ -1,0 +1,13 @@
+.env
+.venv
+__pycache__
+**/__pycache__
+data/progress/
+.git
+.gitignore
+terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+deploy.sh
+README.md

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mastery Flashcards</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      background: #fff8f2;
+      color: #2d1a00;
+      min-height: 100vh;
+    }
+
+    /* ── Top navbar ── */
+    .navbar {
+      background: linear-gradient(90deg, #ff8800 0%, #ffb347 100%);
+      padding: 0 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      box-shadow: 0 2px 12px rgba(255,136,0,0.22);
+    }
+
+    .navbar h1 {
+      color: white;
+      font-size: 21px;
+      font-weight: 800;
+      margin: 0;
+      letter-spacing: 0.5px;
+    }
+
+    .navbar-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-bar {
+      background: #fff3e0;
+      border-bottom: 1.5px solid #ffd699;
+      padding: 5px 28px;
+      font-size: 13px;
+      color: #b85c00;
+      min-height: 28px;
+    }
+
+    /* ── Main two-column layout ── */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 18px;
+      padding: 18px 24px;
+      max-width: 1400px;
+      margin: 0 auto;
+      align-items: start;
+    }
+
+    /* ── Panels ── */
+    .panel {
+      background: #fffaf5;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 12px rgba(255,136,0,0.07);
+      border: 1.5px solid #ffe0b3;
+    }
+
+    .panel:last-child { margin-bottom: 0; }
+
+    .card-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    h2, h3 {
+      margin-top: 0;
+      color: #ff8800;
+      font-weight: 700;
+    }
+
+    h2 { font-size: 16px; margin-bottom: 12px; }
+    h3 { font-size: 14px; margin-bottom: 8px; }
+
+    /* ── Card area ── */
+    .card-meta {
+      color: #b85c00;
+      font-size: 13px;
+      margin: 0 0 10px 0;
+      font-weight: 600;
+    }
+
+    .card-box {
+      min-height: 130px;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      padding: 14px 16px;
+      border-radius: 10px;
+      background: #fff3e0;
+      border: 1.5px solid #ffd699;
+      color: #2d1a00;
+      font-size: 15px;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    /* ── Buttons ── */
+    button {
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 16px;
+      transition: opacity 0.15s, box-shadow 0.15s;
+    }
+
+    button:hover { opacity: 0.88; }
+
+    .btn-primary {
+      background: linear-gradient(90deg, #ff8800 60%, #ffb347 100%);
+      color: white;
+      box-shadow: 0 2px 8px #ffb34733;
+    }
+
+    .btn-secondary {
+      background: #ffe0b3;
+      color: #b85c00;
+    }
+
+    select, input[type="text"] {
+      font-size: 14px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      border: 1.5px solid #ffd699;
+      background: #fff8f2;
+      color: #2d1a00;
+      outline: none;
+    }
+
+    select:focus, input[type="text"]:focus {
+      border-color: #ff8800;
+      box-shadow: 0 0 0 2px #ff880022;
+    }
+
+    /* Rating buttons */
+    .rating-row { margin-top: 14px; gap: 8px; }
+    .again { background: #ef4444; color: white; }
+    .hard  { background: #ffb347; color: white; }
+    .good  { background: #10b981; color: white; }
+    .easy  { background: #3b82f6; color: white; }
+
+    .hidden { display: none; }
+
+    /* ── Right column ── */
+    .right-col { display: flex; flex-direction: column; }
+
+    /* ── Stats grid ── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .stat {
+      background: #fff3e0;
+      border: 1.5px solid #ffd699;
+      border-radius: 10px;
+      padding: 12px 14px;
+      box-shadow: 0 2px 8px #ffb34718;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: #b85c00;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: #ff8800;
+      line-height: 1.2;
+      margin-top: 2px;
+    }
+
+    /* ── List items ── */
+    .list-item {
+      padding: 8px 0;
+      border-bottom: 1px solid #ffd699;
+      font-size: 13px;
+    }
+
+    .list-item:last-child { border-bottom: none; }
+    .list-item strong { color: #2d1a00; font-size: 14px; }
+
+    .muted {
+      color: #b85c00;
+      font-size: 13px;
+    }
+
+    .small { font-size: 13px; }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+        padding: 12px;
+      }
+      .navbar { padding: 0 14px; }
+      .navbar-controls { gap: 8px; }
+      .navbar select { min-width: 140px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top navbar -->
+  <nav class="navbar">
+    <h1>🎓 Mastery Flashcards</h1>
+  </nav>
+  <div class="status-bar"><span id="status-message">&nbsp;</span></div>
+
+  <!-- Two-column layout -->
+  <div class="main-layout">
+
+    <!-- LEFT: Flashcard + Search -->
+    <div class="left-col">
+      <div class="panel">
+        <div class="card-panel-header">
+          <h2 style="margin-bottom:0;">Current Card</h2>
+          <div class="row" style="gap:8px;">
+            <label for="topic-select" style="font-size:13px;font-weight:600;color:#b85c00;">Topic:</label>
+            <select id="topic-select">
+              <option value="All">All</option>
+            </select>
+            <button id="next-card-btn" class="btn-primary">Get Next Card</button>
+          </div>
+        </div>
+        <p id="card-meta" class="card-meta" style="margin-top:10px;">No card loaded yet.</p>
+
+        <div id="front-box" class="card-box">Click "Get Next Card" to begin.</div>
+
+        <div class="row" style="margin-top: 14px;">
+          <button id="show-answer-btn" class="btn-secondary">Show Answer</button>
+        </div>
+
+        <div id="answer-section" class="hidden" style="margin-top: 20px;">
+          <h3>Answer</h3>
+          <div id="back-box" class="card-box"></div>
+
+          <div id="explanation-wrap" class="hidden" style="margin-top: 14px;">
+            <h3>Explanation</h3>
+            <div id="explanation-box" class="card-box"></div>
+          </div>
+
+          <div id="example-wrap" class="hidden" style="margin-top: 14px;">
+            <h3>Example</h3>
+            <div id="example-box" class="card-box"></div>
+          </div>
+
+          <div id="why-wrong-wrap" class="hidden" style="margin-top: 14px;">
+            <h3>Why other options are wrong</h3>
+            <div id="why-wrong-box" class="card-box"></div>
+          </div>
+
+          <div class="row rating-row">
+            <button class="again" data-rating="again">Again</button>
+            <button class="hard"  data-rating="hard">Hard</button>
+            <button class="good"  data-rating="good">Good</button>
+            <button class="easy"  data-rating="easy">Easy</button>
+          </div>
+
+          <p class="muted small" style="margin-top: 8px;">
+            Keyboard: Space = show answer &nbsp;|&nbsp; 1 = Again &nbsp; 2 = Hard &nbsp; 3 = Good &nbsp; 4 = Easy
+          </p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Search Cards</h2>
+        <div class="row">
+          <input id="search-input" type="text" placeholder="Search by keyword..." style="flex: 1; min-width: 0;" />
+          <button id="search-btn" class="btn-primary">Search</button>
+        </div>
+        <div id="search-results" style="margin-top: 14px;"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Dashboard sidebar -->
+    <div class="right-col">
+      <div class="panel">
+        <h2>Dashboard</h2>
+        <div id="dashboard-totals" class="stat-grid"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Weakest Topics</h2>
+        <div id="weak-topics"><div class="muted">No data yet.</div></div>
+      </div>
+
+      <div class="panel">
+        <h2>Hard Cards</h2>
+        <div id="hard-cards"><div class="muted">No hard cards yet.</div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
