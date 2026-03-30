@@ -1,27 +1,34 @@
-# Mastery Flashcards Airtable Ready
+# C22 Mastery Quiz Flashcard Tool
 
-A local FastAPI flashcard app for Sigma Labs style mastery quiz revision.
+A FastAPI flashcard app for Sigma Labs mastery quiz revision. Flashcard data is baked in as static JSON — no external API required at runtime. Per-user progress is tracked via a browser UUID stored in `localStorage`.
 
 ## Features
-- Load demo mastery quiz data
-- Import quiz data from Airtable using env variables
-- Convert mastery quiz questions into flashcards
-- Topic and subtopic filtering
-- Again, Hard, Good, Easy spaced repetition buttons
-- Explanation, wrong options notes, and example block
-- Dashboard and search
-- Keyboard shortcuts
 
-## Setup
+- Spaced repetition scheduling (Again / Hard / Good / Easy)
+- Topic filtering and keyword search
+- Dashboard with stats, weakest topics, and hard cards
+- Per-user progress — each browser gets its own independent session
+- Fully static data — no Airtable connection needed at runtime
 
-Create a `.env` file in the project root using `.env.example` as a guide.
+## Project structure
 
-Example:
-
-AIRTABLE_PAT=your_real_pat_here
-AIRTABLE_BASE_ID=appXXXXXXXXXXXXXX
-AIRTABLE_TABLE_NAME=Mastery Quiz Questions
-AIRTABLE_VIEW_NAME=Grid view
+```
+app/
+  main.py        # FastAPI routes
+  service.py     # Business logic
+  models.py      # Pydantic models
+  scheduler.py   # Spaced repetition logic
+data/
+  flashcards.json      # Static flashcard data (baked into Docker image)
+  quiz_questions.json  # Raw question data
+  progress/            # Per-user progress files (runtime, gitignored)
+static/
+  index.html
+  app.js
+  styles.css
+terraform/       # AWS infrastructure (ECS Fargate + ALB + ECR)
+deploy.sh        # Build, push to ECR, redeploy ECS
+```
 
 ## Run locally
 
@@ -34,23 +41,26 @@ uvicorn app.main:app --reload
 
 Open `http://127.0.0.1:8000`
 
-## Main endpoints
-- `POST /api/load-demo-data`
-- `GET /api/next-card?topic=All`
-- `POST /api/review`
-- `GET /api/dashboard`
-- `GET /api/search`
-- `GET /api/airtable/status`
-- `POST /api/airtable/import`
+## API endpoints
 
-## How Airtable import works
-The app reads these env vars:
-- `AIRTABLE_PAT`
-- `AIRTABLE_BASE_ID`
-- `AIRTABLE_TABLE_NAME`
-- `AIRTABLE_VIEW_NAME`
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/next-card?topic=All` | Get next due card |
+| POST | `/api/review` | Submit card rating |
+| GET | `/api/dashboard` | User stats and progress |
+| GET | `/api/search?q=keyword` | Search flashcards |
 
-It fetches records from Airtable, converts them into quiz questions, saves them to `data/quiz_questions.json`, then rebuilds `data/flashcards.json` and resets `data/progress.json`.
+All progress endpoints require an `X-User-Id` header (UUID). The frontend handles this automatically via `localStorage`.
 
-## Important note
-You will likely need to adjust `app/importer.py` once your team confirms the exact Airtable field names.
+## Deploy to AWS
+
+```bash
+# 1. Fill in your VPC and subnet IDs in terraform/terraform.tfvars
+# 2. Apply infrastructure
+cd terraform && terraform init && terraform apply
+
+# 3. Build, push image to ECR and redeploy ECS
+cd .. && ./deploy.sh
+```
+
+See `terraform/terraform.tfvars` for all configurable values.
